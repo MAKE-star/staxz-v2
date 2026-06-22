@@ -16,9 +16,9 @@ export const BANKS = [
   { code: '215', name: 'Unity Bank' },
   { code: '035', name: 'Wema Bank' },
   { code: '057', name: 'Zenith Bank' },
-  { code: '090405', name: 'OPay' },
+  { code: '999992', name: 'OPay' },
   { code: '100004', name: 'Kuda Bank' },
-  { code: '090110', name: 'VFD Microfinance Bank' },
-  { code: '50515', name: 'Moniepoint' },
-  { code: '999992', name: 'PalmPay' },
+  // { code: '090110', name: 'VFD Microfinance Bank' },
+  { code: '999993', name: 'Moniepoint' },
+  { code: '999991', name: 'PalmPay' },
 ];

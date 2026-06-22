@@ -55,7 +55,7 @@ export default function Step2() {
         <TouchableOpacity onPress={() => router.push('/(provider)/onboarding/step3')}
           disabled={data.service_categories.length === 0}
           style={{ backgroundColor: data.service_categories.length > 0 ? C.primary : C.border, borderRadius: 14, height: 54, alignItems: 'center', justifyContent: 'center', elevation: data.service_categories.length > 0 ? 8 : 0 }}>
-          <Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>Continue →</Text>
+          <Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>Continue </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

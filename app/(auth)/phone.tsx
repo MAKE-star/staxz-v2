@@ -55,7 +55,7 @@ export default function SignInScreen() {
         {/* Sign In button */}
         <TouchableOpacity onPress={submit} disabled={loading}
           style={{ backgroundColor: C.primary, borderRadius: 14, height: 54, alignItems: 'center', justifyContent: 'center', shadowColor: C.primary, shadowOpacity: 0.35, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 8, marginBottom: 24 }}>
-          <Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>{loading ? 'Sending code...' : 'Continue →'}</Text>
+          <Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>{loading ? 'Sending code...' : 'Continue'}</Text>
         </TouchableOpacity>
 
         {/* Sign Up link */}

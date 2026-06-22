@@ -30,7 +30,7 @@ export default function RoleScreen() {
       <TouchableOpacity onPress={() => { if (role === 'provider') router.replace('/(provider)/onboarding/step1'); else router.replace('/(hirer)/(tabs)'); }}
         disabled={!role}
         style={{ backgroundColor: role ? C.primary : '#C084E8', borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 16 }}>
-        <Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>Continue →</Text>
+        <Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>Continue </Text>
       </TouchableOpacity>
     </View>
   );

@@ -178,7 +178,7 @@ export default function Step1() {
 
           <TouchableOpacity onPress={() => router.push('/(provider)/onboarding/step2')} disabled={!canContinue}
             style={{ backgroundColor: canContinue ? C.primary : C.border, borderRadius: 14, height: 54, alignItems: 'center', justifyContent: 'center', elevation: canContinue ? 8 : 0, shadowColor: C.primary, shadowOpacity: canContinue ? 0.35 : 0, shadowRadius: 12, shadowOffset: { width: 0, height: 6 } }}>
-            <Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>Continue →</Text>
+            <Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>Continue </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
