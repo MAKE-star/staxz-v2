@@ -6,21 +6,43 @@ import { useAuth } from '../../../src/store/auth';
 import { Progress } from '../../../src/components/Progress';
 import { api } from '../../../src/api';
 import { C, API_URL } from '../../../src/constants';
-import { BANKS } from '../../../src/constants/banks';
+import { Confetti } from '../../../src/components/Confetti';
+
+interface Bank { code: string; name: string; }
 
 export default function Step5() {
   const router = useRouter();
   const { data, update, reset } = useOnboarding();
   const { token } = useAuth();
-  const [bankOpen, setBankOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [resolving, setResolving] = useState(false);
+  const [bankOpen, setBankOpen]       = useState(false);
+  const [loading, setLoading]         = useState(false);
+  const [celebrate, setCelebrate]     = useState(false);
+  const [resolving, setResolving]     = useState(false);
   const [resolvedName, setResolvedName] = useState('');
   const [resolveError, setResolveError] = useState('');
   const [manualEntry, setManualEntry] = useState(false);
-  const [manualName, setManualName] = useState('');
+  const [manualName, setManualName]   = useState('');
+  const [banks, setBanks]             = useState<Bank[]>([]);
+  const [banksLoading, setBanksLoading] = useState(true);
+  const [bankSearch, setBankSearch]   = useState('');
 
-  const selectedBank = BANKS.find(b => b.code === data.bank_code);
+  // Load banks from Flutterwave via backend
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await api('/payments/banks', { token });
+        const list: Bank[] = (res.data ?? []).map((b: any) => ({ code: String(b.code), name: b.name }));
+        setBanks(list);
+      } catch {
+        Alert.alert('Error', 'Could not load banks. Please check your connection and try again.');
+      } finally {
+        setBanksLoading(false);
+      }
+    })();
+  }, []);
+
+  const selectedBank = banks.find(b => b.code === data.bank_code);
+  const filteredBanks = banks.filter(b => b.name.toLowerCase().includes(bankSearch.toLowerCase()));
 
   // Auto-resolve account name when 10 digits + bank selected
   useEffect(() => {
@@ -36,6 +58,8 @@ export default function Step5() {
     setResolving(true);
     setResolveError('');
     setResolvedName('');
+    setManualEntry(false);
+    setManualName('');
     try {
       const res = await api(`/payments/resolve-account?account_number=${data.bank_account_number}&bank_code=${data.bank_code}`, { token });
       const name = res.data?.account_name ?? res.data?.data?.account_name;
@@ -46,7 +70,7 @@ export default function Step5() {
         setResolveError('Could not resolve account. Check number and bank.');
       }
     } catch {
-      setResolveError('Could not verify account. Check your details.');
+      setResolveError('Could not verify account. Enter your account name manually.');
     } finally {
       setResolving(false);
     }
@@ -72,19 +96,21 @@ export default function Step5() {
           location_text:       data.location_text,
           full_address:        data.full_address,
           service_modes:       data.service_modes,
-          base_fee_kobo:       parseInt(data.base_fee) * 100,
+          base_fee_kobo:       Math.round(parseFloat(data.base_fee || '0') * 100),
           service_categories:  data.service_categories,
           bank_account_name:   effectiveName,
           bank_account_number: data.bank_account_number,
           bank_code:           data.bank_code,
           bio:                 data.bio || undefined,
+          years_experience:    data.years_experience ? parseInt(data.years_experience, 10) : undefined,
+          location_lat:        data.location_lat,
+          location_lng:        data.location_lng,
         },
       });
-      // Upload portfolio photos now that provider exists
+
       const providerId = res.data?.id ?? res.data?.data?.id;
 
       if (providerId) {
-        // Get fresh state directly from store to avoid stale closure
         const freshData = useOnboarding.getState().data;
         const allPhotos = freshData.photos ?? {};
         const cats = freshData.service_categories;
@@ -107,6 +133,8 @@ export default function Step5() {
         }
       }
 
+      setCelebrate(true);
+      await new Promise(r => setTimeout(r, 1800));
       reset();
       router.replace('/(provider)/(tabs)');
     } catch (e: any) {
@@ -135,18 +163,21 @@ export default function Step5() {
 
           {/* Bank picker */}
           <Text style={{ fontSize: 12, fontWeight: '700', color: C.text2, letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase' }}>Bank *</Text>
-          <TouchableOpacity onPress={() => setBankOpen(true)}
+          <TouchableOpacity onPress={() => { if (!banksLoading) setBankOpen(true); }}
             style={{ backgroundColor: C.bg1, borderRadius: 12, borderWidth: 1.5, borderColor: data.bank_code ? C.primary : C.border, padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <Text style={{ fontSize: 15, color: selectedBank ? C.text0 : C.text2 }}>
-              {selectedBank?.name ?? 'Select your bank'}
-            </Text>
+            {banksLoading
+              ? <ActivityIndicator size="small" color={C.primary} />
+              : <Text style={{ fontSize: 15, color: selectedBank ? C.text0 : C.text2 }}>
+                  {selectedBank?.name ?? 'Select your bank'}
+                </Text>
+            }
             <Text style={{ color: C.text2 }}>▼</Text>
           </TouchableOpacity>
 
           {/* Account number */}
           <Text style={{ fontSize: 12, fontWeight: '700', color: C.text2, letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase' }}>Account Number *</Text>
           <TextInput value={data.bank_account_number}
-            onChangeText={v => { update({ bank_account_number: v.replace(/\D/g, ''), bank_account_name: '' }); setResolvedName(''); setResolveError(''); }}
+            onChangeText={v => { update({ bank_account_number: v.replace(/\D/g, ''), bank_account_name: '' }); setResolvedName(''); setResolveError(''); setManualEntry(false); setManualName(''); }}
             placeholder="10-digit NUBAN number" keyboardType="number-pad" maxLength={10}
             style={{ backgroundColor: C.bg1, borderRadius: 12, borderWidth: 1.5, borderColor: resolvedName ? C.green : resolveError ? C.red : C.border, padding: 14, fontSize: 15, color: C.text0, marginBottom: 8 }} />
 
@@ -178,7 +209,8 @@ export default function Step5() {
           {manualEntry && !resolvedName && (
             <View style={{ marginBottom: 16 }}>
               <Text style={{ fontSize: 12, fontWeight: '700', color: C.text2, letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase' }}>Account Name *</Text>
-              <TextInput value={manualName} onChangeText={setManualName}
+              <TextInput value={manualName}
+                onChangeText={v => { setManualName(v); update({ bank_account_name: v }); }}
                 placeholder="Enter your account name exactly" autoCapitalize="words"
                 style={{ backgroundColor: C.bg1, borderRadius: 12, borderWidth: 1.5, borderColor: manualName.length >= 3 ? C.green : C.border, padding: 14, fontSize: 15, color: C.text0, marginBottom: 4 }} />
               <Text style={{ fontSize: 11, color: C.text2 }}>Must match your BVN name exactly</Text>
@@ -219,12 +251,18 @@ export default function Step5() {
       {/* Bank Modal */}
       <Modal visible={bankOpen} transparent animationType="slide" onRequestClose={() => setBankOpen(false)}>
         <TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }} onPress={() => setBankOpen(false)} />
-        <View style={{ backgroundColor: C.bg1, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, maxHeight: '70%' }}>
+        <View style={{ backgroundColor: C.bg1, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, maxHeight: '75%' }}>
           <View style={{ width: 36, height: 4, backgroundColor: C.border, borderRadius: 2, alignSelf: 'center', marginBottom: 16 }} />
-          <Text style={{ fontSize: 18, fontWeight: '700', color: C.text0, marginBottom: 16 }}>Select Bank</Text>
-          <FlatList data={BANKS} keyExtractor={b => b.code}
+          <Text style={{ fontSize: 18, fontWeight: '700', color: C.text0, marginBottom: 12 }}>Select Bank</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bg2, borderRadius: 12, paddingHorizontal: 14, height: 44, marginBottom: 12, borderWidth: 1, borderColor: C.border }}>
+            <Text style={{ marginRight: 8 }}>🔍</Text>
+            <TextInput value={bankSearch} onChangeText={setBankSearch}
+              placeholder="Search bank..." placeholderTextColor={C.text2}
+              style={{ flex: 1, fontSize: 14, color: C.text0 }} />
+          </View>
+          <FlatList data={filteredBanks} keyExtractor={b => b.code}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => { update({ bank_code: item.code, bank_account_name: '' }); setResolvedName(''); setBankOpen(false); }}
+              <TouchableOpacity onPress={() => { update({ bank_code: item.code, bank_account_name: '' }); setResolvedName(''); setManualEntry(false); setManualName(''); setBankSearch(''); setBankOpen(false); }}
                 style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 0.5, borderBottomColor: C.border, backgroundColor: item.code === data.bank_code ? C.bg2 : 'transparent' }}>
                 <Text style={{ fontSize: 15, color: item.code === data.bank_code ? C.primary : C.text0, fontWeight: item.code === data.bank_code ? '700' : '400' }}>{item.name}</Text>
                 {item.code === data.bank_code && <Text style={{ color: C.primary, fontWeight: '700' }}>✓</Text>}
@@ -232,6 +270,7 @@ export default function Step5() {
             )} />
         </View>
       </Modal>
+      <Confetti visible={celebrate} />
     </KeyboardAvoidingView>
   );
 }
