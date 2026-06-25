@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../../src/store/onboarding';
-import { Progress } from '../../../src/components/Progress';
+import { Progress, DotBackground } from '../../../src/components/Progress';
+import { ChevronDown, ChevronRight } from 'lucide-react-native';
+import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 import { C } from '../../../src/constants';
 import { STATES, getAreasForState } from '../../../src/constants/locations';
 
@@ -21,6 +23,7 @@ export default function Step4() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={{ flex: 1, backgroundColor: C.bg0 }} contentContainerStyle={{ paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
+        <DotBackground />
         <Progress current={3} onBack={() => router.back()} />
 
         <View style={{ paddingHorizontal: 24 }}>
@@ -29,7 +32,7 @@ export default function Step4() {
           <View style={{ backgroundColor: '#25D366' + '12', borderRadius: 20, padding: 18, marginBottom: 28, borderWidth: 1.5, borderColor: '#25D366' + '30' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
               <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: '#25D366' + '20', alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontSize: 22 }}>💬</Text>
+                <MCI name='whatsapp' size={24} color='#25D366' />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 15, fontWeight: '800', color: C.text0 }}>WhatsApp Number</Text>
@@ -57,7 +60,7 @@ export default function Step4() {
           <View style={{ backgroundColor: C.bg1, borderRadius: 20, padding: 18, marginBottom: 24, borderWidth: 1, borderColor: C.border }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 }}>
               <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: C.primaryLo, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontSize: 22 }}>📍</Text>
+                <MCI name='map-marker-outline' size={24} color={C.primary} />
               </View>
               <View>
                 <Text style={{ fontSize: 15, fontWeight: '800', color: C.text0 }}>Your Location</Text>
@@ -72,7 +75,7 @@ export default function Step4() {
               <Text style={{ fontSize: 15, color: data.state ? C.text0 : C.text2, fontWeight: data.state ? '600' : '400' }}>
                 {data.state || 'Select your state'}
               </Text>
-              <Text style={{ color: C.text2 }}>▼</Text>
+              <ChevronDown size={16} color={C.text2} />
             </TouchableOpacity>
 
             {/* Area */}
@@ -111,7 +114,7 @@ export default function Step4() {
 
           <TouchableOpacity onPress={() => router.push('/(provider)/onboarding/step5')} disabled={!canContinue}
             style={{ backgroundColor: canContinue ? C.primary : C.bg3, borderRadius: 16, height: 56, alignItems: 'center', justifyContent: 'center', elevation: canContinue ? 10 : 0, shadowColor: C.primary, shadowOpacity: canContinue ? 0.4 : 0, shadowRadius: 14, shadowOffset: { width: 0, height: 6 } }}>
-            <Text style={{ color: canContinue ? '#fff' : C.text2, fontWeight: '800', fontSize: 16 }}>Continue →</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><Text style={{ color: canContinue ? '#fff' : C.text2, fontWeight: '800', fontSize: 16 }}>Continue</Text><ChevronRight size={18} color={canContinue ? '#fff' : C.text2} strokeWidth={2.5} /></View>
           </TouchableOpacity>
         </View>
       </ScrollView>

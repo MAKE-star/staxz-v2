@@ -1,27 +1,30 @@
 export const API_URL = 'https://web-production-6782a.up.railway.app/api/v1';
 
 export const C = {
-  // Brand
+  // Brand — purple
   primary:    '#7B4FA6',
   primaryLo:  '#7B4FA614',
   primaryMid: '#7B4FA638',
 
-  // Backgrounds
-  bg0: '#FAF8F5',
-  bg1: '#FFFFFF',
-  bg2: '#F3EFF9',
-  bg3: '#EDE8F7',
+  // Brand — rose/pink accent
+  rose:     '#EC4899',
+  roseLo:   '#EC489915',
+  roseMid:  '#EC489935',
 
-  // Aliases (for compatibility)
-  bg:    '#FAF8F5',
+  // Backgrounds — warm cream/blush
+  bg0: '#FFF8FB',
+  bg1: '#FFFFFF',
+  bg2: '#FDF0F7',
+  bg3: '#F9E6F3',
+
+  // Aliases
+  bg:    '#FFF8FB',
   white: '#FFFFFF',
 
   // Text
   text0: '#1A1025',
   text1: '#4A3D5C',
   text2: '#9080A8',
-
-  // Aliases
   text:  '#1A1025',
   text3: '#9080A8',
 
@@ -33,8 +36,8 @@ export const C = {
   red:     '#D94F4F',
   redLo:   '#D94F4F20',
 
-  // Border
-  border: '#E8E2F0',
+  // Border — soft blush
+  border: '#F0E0EC',
 };
 
 export const CATS = [

@@ -2,8 +2,9 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../../src/store/onboarding';
-import { Progress } from '../../../src/components/Progress';
+import { Progress, DotBackground } from '../../../src/components/Progress';
 import { C, CATS } from '../../../src/constants';
+import { ChevronRight } from 'lucide-react-native';
 import { SERVICE_ICONS } from '../../../src/components/ServiceIcon';
 
 const POPULAR = ['haircut', 'braids', 'makeup', 'nails', 'lashes'];
@@ -25,7 +26,8 @@ export default function Step2() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: C.bg0 }} contentContainerStyle={{ paddingBottom: 48 }}>
-      <Progress current={1} onBack={() => router.back()} />
+      <DotBackground />
+        <Progress current={1} onBack={() => router.back()} />
 
       {/* Floating selection pill */}
       {selected.length > 0 && (
@@ -60,9 +62,7 @@ export default function Step2() {
         <TouchableOpacity onPress={() => router.push('/(provider)/onboarding/step3')}
           disabled={selected.length === 0}
           style={{ backgroundColor: selected.length > 0 ? C.primary : C.bg3, borderRadius: 16, height: 56, alignItems: 'center', justifyContent: 'center', elevation: selected.length > 0 ? 10 : 0, shadowColor: C.primary, shadowOpacity: selected.length > 0 ? 0.4 : 0, shadowRadius: 14, shadowOffset: { width: 0, height: 6 } }}>
-          <Text style={{ color: selected.length > 0 ? '#fff' : C.text2, fontWeight: '800', fontSize: 16 }}>
-            {selected.length === 0 ? 'Select at least one service' : `Continue with ${selected.length} service${selected.length > 1 ? 's' : ''} →`}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><Text style={{ color: selected.length > 0 ? '#fff' : C.text2, fontWeight: '800', fontSize: 16 }}>{selected.length === 0 ? 'Select at least one service' : `Continue with ${selected.length} service${selected.length > 1 ? 's' : ''}`}</Text>{selected.length > 0 && <ChevronRight size={18} color='#fff' strokeWidth={2.5} />}</View>
         </TouchableOpacity>
       </View>
     </ScrollView>

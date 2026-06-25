@@ -3,8 +3,10 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingVi
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../../src/store/onboarding';
 import { useAuth } from '../../../src/store/auth';
-import { Progress } from '../../../src/components/Progress';
+import { Progress, DotBackground } from '../../../src/components/Progress';
 import { api } from '../../../src/api';
+import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
+import { ChevronDown, ChevronRight } from 'lucide-react-native';
 import { C, API_URL } from '../../../src/constants';
 import { Confetti } from '../../../src/components/Confetti';
 
@@ -147,6 +149,7 @@ export default function Step5() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={{ flex: 1, backgroundColor: C.bg0 }} contentContainerStyle={{ paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+        <DotBackground />
         <Progress current={4} onBack={() => router.back()} />
 
         <View style={{ paddingHorizontal: 24, paddingTop: 8 }}>
@@ -155,7 +158,7 @@ export default function Step5() {
 
           {/* Payout info */}
           <View style={{ backgroundColor: C.green + '15', borderRadius: 14, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: C.green + '30' }}>
-            <Text style={{ fontSize: 14, fontWeight: '700', color: C.text0, marginBottom: 4 }}>💸 How payouts work</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}><MCI name='cash-multiple' size={18} color={C.green} /><Text style={{ fontSize: 14, fontWeight: '700', color: C.text0 }}>How payouts work</Text></View>
             <Text style={{ fontSize: 13, color: C.text1, lineHeight: 18 }}>
               When a client confirms your service, <Text style={{ fontWeight: '700' }}>85%</Text> of the quoted amount goes directly to your bank account within 24 hours. Staxz takes a 15% platform fee.
             </Text>
@@ -171,7 +174,7 @@ export default function Step5() {
                   {selectedBank?.name ?? 'Select your bank'}
                 </Text>
             }
-            <Text style={{ color: C.text2 }}>▼</Text>
+            <ChevronDown size={16} color={C.text2} />
           </TouchableOpacity>
 
           {/* Account number */}
@@ -190,7 +193,7 @@ export default function Step5() {
           )}
           {resolvedName !== '' && !resolving && (
             <View style={{ backgroundColor: C.green + '15', borderRadius: 10, padding: 12, marginBottom: 20, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: C.green + '40' }}>
-              <Text style={{ fontSize: 18 }}>✅</Text>
+              <MCI name='check-circle-outline' size={22} color={C.green} />
               <View>
                 <Text style={{ fontSize: 11, color: C.text2 }}>Account verified</Text>
                 <Text style={{ fontSize: 15, fontWeight: '700', color: C.text0 }}>{resolvedName}</Text>
@@ -199,7 +202,7 @@ export default function Step5() {
           )}
           {resolveError !== '' && !resolving && !manualEntry && (
             <View style={{ backgroundColor: C.amberLo, borderRadius: 10, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: C.amber + '40' }}>
-              <Text style={{ fontSize: 13, color: C.amber, fontWeight: '600' }}>⚠️ Auto-verification unavailable</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}><MCI name='alert-outline' size={16} color={C.amber} /><Text style={{ fontSize: 13, color: C.amber, fontWeight: '600' }}>Auto-verification unavailable</Text></View>
               <Text style={{ fontSize: 12, color: C.text1, marginTop: 4 }}>This bank isn't supported in test mode. Enter your account name manually.</Text>
               <TouchableOpacity onPress={() => setManualEntry(true)} style={{ marginTop: 8, backgroundColor: C.primary, borderRadius: 8, padding: 8, alignItems: 'center' }}>
                 <Text style={{ fontSize: 13, color: C.white, fontWeight: '600' }}>Enter Account Name Manually</Text>
@@ -239,7 +242,7 @@ export default function Step5() {
 
           <TouchableOpacity onPress={submit} disabled={!canSubmit || loading}
             style={{ backgroundColor: canSubmit && !loading ? C.primary : C.border, borderRadius: 14, height: 56, alignItems: 'center', justifyContent: 'center', elevation: canSubmit ? 8 : 0 }}>
-            {loading ? <ActivityIndicator color={C.white} /> : <Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>Go Live 🚀</Text>}
+            {loading ? <ActivityIndicator color={C.white} /> : <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>Go Live</Text><MCI name='rocket-launch-outline' size={18} color={C.white} /></View>}
           </TouchableOpacity>
 
           <Text style={{ fontSize: 12, color: C.text2, textAlign: 'center', marginTop: 12 }}>

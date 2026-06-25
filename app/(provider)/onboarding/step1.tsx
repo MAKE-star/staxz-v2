@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, ImageBackground } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../../src/store/onboarding';
-import { Progress } from '../../../src/components/Progress';
+import { Progress, DotBackground } from '../../../src/components/Progress';
 import { api } from '../../../src/api';
 import { useAuth } from '../../../src/store/auth';
+import { ChevronRight } from 'lucide-react-native';
 import { C } from '../../../src/constants';
+import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 
 type CACStatus = 'idle' | 'checking' | 'verified' | 'failed';
 
@@ -61,6 +63,7 @@ export default function Step1() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={{ flex: 1, backgroundColor: C.bg0 }} contentContainerStyle={{ paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
+        <DotBackground />
         <Progress current={0} onBack={() => router.back()} />
 
         {/* Hero image strip */}
@@ -82,17 +85,17 @@ export default function Step1() {
           <Label text="Business Type" />
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
             {[
-              { id: 'salon', label: 'Salon / Shop', emoji: '🏢', sub: 'Fixed location' },
-              { id: 'independent', label: 'Independent', emoji: '💼', sub: 'Solo provider' },
+              { id: 'salon', label: 'Salon / Shop', icon: 'store', sub: 'Fixed location' },
+              { id: 'independent', label: 'Independent', icon: 'briefcase-outline', sub: 'Solo provider' },
             ].map(r => (
               <TouchableOpacity key={r.id} onPress={() => update({ business_type: r.id })}
                 style={{ flex: 1, padding: 16, borderRadius: 16, borderWidth: 2, borderColor: data.business_type === r.id ? C.primary : C.border, backgroundColor: data.business_type === r.id ? C.primaryLo : C.bg1 }}>
-                <Text style={{ fontSize: 24, marginBottom: 6 }}>{r.emoji}</Text>
+                <MCI name={r.icon as any} size={26} color={data.business_type === r.id ? C.primary : C.text1} style={{ marginBottom: 6 }} />
                 <Text style={{ fontSize: 13, fontWeight: '800', color: data.business_type === r.id ? C.primary : C.text0 }}>{r.label}</Text>
                 <Text style={{ fontSize: 11, color: C.text2, marginTop: 2 }}>{r.sub}</Text>
                 {data.business_type === r.id && (
                   <View style={{ position: 'absolute', top: 10, right: 10, width: 18, height: 18, borderRadius: 9, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ color: '#fff', fontSize: 10, fontWeight: '900' }}>✓</Text>
+                    <MCI name='check' size={12} color='#fff' />
                   </View>
                 )}
               </TouchableOpacity>
@@ -133,10 +136,10 @@ export default function Step1() {
           </View>
 
           {cacStatus === 'verified' && (
-            <StatusBadge color={C.green} icon="✅" title="CAC Verified" sub={cacName ? `Registered as: ${cacName}` : undefined} />
+            <StatusBadge color={C.green} icon="check-circle-outline" title="CAC Verified" sub={cacName ? `Registered as: ${cacName}` : undefined} />
           )}
           {cacStatus === 'failed' && (
-            <StatusBadge color={C.red} icon="❌" title={cacError} sub="Contact support if your business is registered but verification fails." />
+            <StatusBadge color={C.red} icon="close-circle-outline" title={cacError} sub="Contact support if your business is registered but verification fails." />
           )}
           {cacStatus === 'idle' && (
             <Text style={{ fontSize: 12, color: C.text2, marginBottom: 20 }}>Verifies your legal accountability on the platform.</Text>
@@ -146,17 +149,17 @@ export default function Step1() {
           <Label text="How do you work?" />
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
             {[
-              { id: 'home',   emoji: '🏠', label: 'Home Service',  sub: 'You travel to client' },
-              { id: 'walkin', emoji: '🪑', label: 'Walk-In Only',  sub: 'Client comes to you' },
+              { id: 'home',   icon: 'home-outline',    label: 'Home Service',  sub: 'You travel to client' },
+              { id: 'walkin', icon: 'chair-rolling', label: 'Walk-In Only',  sub: 'Client comes to you' },
             ].map(m => (
               <TouchableOpacity key={m.id} onPress={() => toggleMode(m.id)}
                 style={{ flex: 1, padding: 16, borderRadius: 16, borderWidth: 2, borderColor: data.service_modes.includes(m.id) ? C.primary : C.border, backgroundColor: data.service_modes.includes(m.id) ? C.primaryLo : C.bg1 }}>
-                <Text style={{ fontSize: 26, marginBottom: 6 }}>{m.emoji}</Text>
+                <MCI name={m.icon as any} size={26} color={data.service_modes.includes(m.id) ? C.primary : C.text1} style={{ marginBottom: 6 }} />
                 <Text style={{ fontSize: 13, fontWeight: '800', color: data.service_modes.includes(m.id) ? C.primary : C.text0 }}>{m.label}</Text>
                 <Text style={{ fontSize: 11, color: C.text2, marginTop: 2 }}>{m.sub}</Text>
                 {data.service_modes.includes(m.id) && (
                   <View style={{ position: 'absolute', top: 10, right: 10, width: 18, height: 18, borderRadius: 9, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ color: '#fff', fontSize: 10, fontWeight: '900' }}>✓</Text>
+                    <MCI name='check' size={12} color='#fff' />
                   </View>
                 )}
               </TouchableOpacity>
@@ -186,7 +189,7 @@ export default function Step1() {
 
           {!canContinue && cacStatus !== 'verified' && (
             <View style={{ backgroundColor: C.amberLo, borderRadius: 14, padding: 14, marginBottom: 20, borderWidth: 1, borderColor: C.amber + '40', flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
-              <Text style={{ fontSize: 18 }}>⚠️</Text>
+              <MCI name='alert-outline' size={22} color={C.amber} />
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 13, fontWeight: '700', color: C.amber }}>CAC verification required</Text>
                 <Text style={{ fontSize: 12, color: C.text1, marginTop: 3 }}>Enter your CAC number above and tap "Verify" to continue.</Text>
@@ -222,7 +225,7 @@ function Gap() { return <View style={{ height: 20 }} />; }
 function StatusBadge({ color, icon, title, sub }: { color: string; icon: string; title: string; sub?: string }) {
   return (
     <View style={{ backgroundColor: color + '15', borderRadius: 12, padding: 12, marginBottom: 20, borderWidth: 1, borderColor: color + '40', flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
-      <Text style={{ fontSize: 18 }}>{icon}</Text>
+      <MCI name={icon as any} size={22} color={color} />
       <View style={{ flex: 1 }}>
         <Text style={{ fontSize: 13, fontWeight: '700', color }}>{title}</Text>
         {sub ? <Text style={{ fontSize: 12, color: C.text1, marginTop: 3 }}>{sub}</Text> : null}
@@ -235,7 +238,7 @@ function ContinueButton({ active, onPress }: { active: boolean; onPress: () => v
   return (
     <TouchableOpacity onPress={onPress} disabled={!active}
       style={{ backgroundColor: active ? C.primary : C.bg3, borderRadius: 16, height: 56, alignItems: 'center', justifyContent: 'center', elevation: active ? 10 : 0, shadowColor: C.primary, shadowOpacity: active ? 0.4 : 0, shadowRadius: 14, shadowOffset: { width: 0, height: 6 } }}>
-      <Text style={{ color: active ? '#fff' : C.text2, fontWeight: '800', fontSize: 16, letterSpacing: 0.3 }}>Continue →</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><Text style={{ color: active ? '#fff' : C.text2, fontWeight: '800', fontSize: 16, letterSpacing: 0.3 }}>Continue</Text><ChevronRight size={18} color={active ? '#fff' : C.text2} strokeWidth={2.5} /></View>
     </TouchableOpacity>
   );
 }

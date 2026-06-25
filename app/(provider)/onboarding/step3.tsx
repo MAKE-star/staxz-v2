@@ -4,7 +4,9 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-na
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useOnboarding } from '../../../src/store/onboarding';
-import { Progress } from '../../../src/components/Progress';
+import { Progress, DotBackground } from '../../../src/components/Progress';
+import { ChevronRight } from 'lucide-react-native';
+import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 import { C, CATS } from '../../../src/constants';
 import { SERVICE_ICONS } from '../../../src/components/ServiceIcon';
 
@@ -55,7 +57,8 @@ export default function Step3() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: C.bg0 }} contentContainerStyle={{ paddingBottom: 48 }}>
-      <Progress current={2} onBack={() => router.back()} />
+      <DotBackground />
+        <Progress current={2} onBack={() => router.back()} />
 
       <View style={{ paddingHorizontal: 24 }}>
 
@@ -63,7 +66,7 @@ export default function Step3() {
         <View style={{ backgroundColor: C.bg2, borderRadius: 16, padding: 16, marginBottom: 24 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <Text style={{ fontSize: 14, fontWeight: '800', color: C.text0 }}>
-              {allReady ? '🎉 Looking great!' : `📸 ${totalPhotos} of ${totalNeeded} photos`}
+              {allReady ? '✨ Looking great!' : `${totalPhotos} of ${totalNeeded} photos`}
             </Text>
             <Text style={{ fontSize: 12, color: allReady ? C.green : C.text2, fontWeight: '700' }}>
               {allReady ? 'All done' : `${totalNeeded - totalPhotos} to go`}
@@ -120,7 +123,7 @@ export default function Step3() {
                   <TouchableOpacity onPress={() => addPhoto(cat.id)}
                     style={{ width: 110, height: 138, borderRadius: 14, borderWidth: 2, borderColor: cat.color + '60', borderStyle: 'dashed', backgroundColor: cat.color + '08', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                     <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: cat.color + '20', alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={{ fontSize: 22, color: cat.color }}>+</Text>
+                      <MCI name='camera-plus-outline' size={26} color={cat.color} />
                     </View>
                     <Text style={{ fontSize: 11, color: cat.color, fontWeight: '800' }}>Add photo</Text>
                     <Text style={{ fontSize: 9, color: cat.color + '80' }}>{catPhotos.length}/10</Text>
@@ -135,7 +138,7 @@ export default function Step3() {
 
         <TouchableOpacity onPress={() => router.push('/(provider)/onboarding/step4')} disabled={!allReady}
           style={{ backgroundColor: allReady ? C.primary : C.bg3, borderRadius: 16, height: 56, alignItems: 'center', justifyContent: 'center', elevation: allReady ? 10 : 0, shadowColor: C.primary, shadowOpacity: allReady ? 0.4 : 0, shadowRadius: 14, shadowOffset: { width: 0, height: 6 } }}>
-          <Text style={{ color: allReady ? '#fff' : C.text2, fontWeight: '800', fontSize: 16 }}>Continue →</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><Text style={{ color: allReady ? '#fff' : C.text2, fontWeight: '800', fontSize: 16 }}>Continue</Text><ChevronRight size={18} color={allReady ? '#fff' : C.text2} strokeWidth={2.5} /></View>
         </TouchableOpacity>
       </View>
     </ScrollView>
