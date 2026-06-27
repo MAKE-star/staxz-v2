@@ -11,15 +11,20 @@
     "icon": "./assets/images/icon.png",
     "splash": {
       "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FAF8F5"
+      "resizeMode": "cover",
+      "backgroundColor": "#7B4FA6"
     },
     "android": {
       "package": "com.staxz.app",
       "adaptiveIcon": {
         "backgroundColor": "#7B4FA6",
         "foregroundImage": "./assets/images/adaptive-icon.png"
-      }
+      },
+      "permissions": [
+        "READ_MEDIA_IMAGES",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "ios": {
       "bundleIdentifier": "com.staxz.app",
@@ -28,8 +33,12 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-asset",
-      "expo-font"
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Staxz needs access to your photos to upload portfolio images."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

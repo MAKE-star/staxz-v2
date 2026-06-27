@@ -11,14 +11,14 @@ export const C = {
   roseLo:   '#EC489915',
   roseMid:  '#EC489935',
 
-  // Backgrounds — warm cream/blush
-  bg0: '#FFF8FB',
+  // Backgrounds — clean neutral
+  bg0: '#FAF8F5',
   bg1: '#FFFFFF',
-  bg2: '#FDF0F7',
-  bg3: '#F9E6F3',
+  bg2: '#F3EFF9',
+  bg3: '#EDE8F7',
 
   // Aliases
-  bg:    '#FFF8FB',
+  bg:    '#FAF8F5',
   white: '#FFFFFF',
 
   // Text
@@ -36,8 +36,8 @@ export const C = {
   red:     '#D94F4F',
   redLo:   '#D94F4F20',
 
-  // Border — soft blush
-  border: '#F0E0EC',
+  // Border
+  border: '#E8E2F0',
 };
 
 export const CATS = [
