@@ -59,7 +59,7 @@ export default function OtpScreen() {
       const userRole = me.data.role;
       const isNew    = res.data.isNewUser;
       if (isNew && userRole !== 'admin') {
-        router.replace(role === 'provider' ? '/(provider)/onboarding' : '/(hirer)/(tabs)');
+        router.replace(role === 'provider' ? '/(provider)/onboarding' : '/(hirer)/welcome');
       } else {
         if      (userRole === 'admin')    router.replace('/(admin)/(tabs)');
         else if (userRole === 'provider') router.replace('/(provider)/(tabs)');
@@ -98,14 +98,14 @@ export default function OtpScreen() {
 
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           {/* Lock icon */}
-          <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: '#EC4899',
+          <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: '#9B6FD4',
             alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
             <Text style={{ fontSize: 28 }}>🔐</Text>
           </View>
           <Text style={{ fontSize: 28, fontWeight: '900', color: '#fff', marginBottom: 6 }}>Enter OTP</Text>
           <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', lineHeight: 21 }}>
             We sent a 6-digit code to{'\n'}
-            <Text style={{ color: '#FFADD9', fontWeight: '800' }}>{phone}</Text>
+            <Text style={{ color: '#D4BDFF', fontWeight: '800' }}>{phone}</Text>
           </Text>
         </Animated.View>
       </View>
@@ -166,7 +166,7 @@ export default function OtpScreen() {
                 </Text>
               : <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Text style={{ fontSize: 16 }}>🔄</Text>
-                  <Text style={{ fontSize: 14, fontWeight: '800', color: '#EC4899' }}>Resend OTP</Text>
+                  <Text style={{ fontSize: 14, fontWeight: '800', color: '#9B6FD4' }}>Resend OTP</Text>
                 </View>
             }
           </TouchableOpacity>

@@ -18,7 +18,7 @@ export default function RegisterPhoneScreen() {
   const scale = useSharedValue(1);
 
   const isProvider = role === 'provider';
-  const color      = isProvider ? '#EC4899' : C.primary;
+  const color      = isProvider ? '#9B6FD4' : C.primary;
   const phone      = '+234' + digits;
   const valid      = /^\+234[0-9]{10}$/.test(phone);
 
@@ -118,7 +118,7 @@ export default function RegisterPhoneScreen() {
 
           {isProvider && (
             <Animated.View entering={FadeInUp.delay(400).duration(400)}
-              style={{ backgroundColor: '#EC489910', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#EC489925' }}>
+              style={{ backgroundColor: '#9B6FD410', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#9B6FD425' }}>
               <Text style={{ fontSize: 13, color: C.text1, lineHeight: 20 }}>
                 After verifying, you'll set up your business profile in 5 quick steps. Takes about 5 minutes.
               </Text>

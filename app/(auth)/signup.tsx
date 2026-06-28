@@ -23,7 +23,7 @@ const ROLES = [
     emoji: '💼',
     title: "I'm a Provider",
     subtitle: 'Offer beauty & grooming services',
-    color: '#EC4899',
+    color: '#9B6FD4',
     bullets: [
       { emoji: '💬', text: 'Get bookings via WhatsApp' },
       { emoji: '🏦', text: 'Paid directly to your bank' },
@@ -51,7 +51,7 @@ export default function SignUpScreen() {
 
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: '#EC4899',
+            <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: '#9B6FD4',
               alignItems: 'center', justifyContent: 'center' }}>
               <Text style={{ fontSize: 22 }}>✦</Text>
             </View>
@@ -112,7 +112,7 @@ export default function SignUpScreen() {
         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 8 }}>
           <Text style={{ fontSize: 14, color: C.text1 }}>Already have an account? </Text>
           <TouchableOpacity onPress={() => router.replace('/(auth)/phone')}>
-            <Text style={{ fontSize: 14, fontWeight: '800', color: '#EC4899' }}>Sign In</Text>
+            <Text style={{ fontSize: 14, fontWeight: '800', color: '#9B6FD4' }}>Sign In</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

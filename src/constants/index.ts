@@ -7,9 +7,9 @@ export const C = {
   primaryMid: '#7B4FA638',
 
   // Brand — rose/pink accent
-  rose:     '#EC4899',
-  roseLo:   '#EC489915',
-  roseMid:  '#EC489935',
+  rose:     '#9B6FD4',
+  roseLo:   '#9B6FD415',
+  roseMid:  '#9B6FD435',
 
   // Backgrounds — clean neutral
   bg0: '#FAF8F5',
@@ -43,8 +43,8 @@ export const C = {
 export const CATS = [
   { id: 'haircut',       label: 'Haircut & Styling', icon: '✂️',  color: '#7B4FA6' },
   { id: 'barbing',       label: 'Barbing',            icon: '🪒',  color: '#06B6D4' },
-  { id: 'braids',        label: 'Braids & Locs',      icon: '🪢',  color: '#EC4899' },
-  { id: 'makeup',        label: 'Makeup',             icon: '💄',  color: '#F43F5E' },
+  { id: 'braids',        label: 'Braids & Locs',      icon: '🪢',  color: '#9B6FD4' },
+  { id: 'makeup',        label: 'Makeup',             icon: '💄',  color: '#9B6FD4' },
   { id: 'bridal_makeup', label: 'Bridal Makeup',      icon: '👰',  color: '#E11D48' },
   { id: 'nails',         label: 'Nails & Gel',        icon: '💅',  color: '#A855F7' },
   { id: 'facials',       label: 'Facials & Skin',     icon: '🧴',  color: '#14B8A6' },

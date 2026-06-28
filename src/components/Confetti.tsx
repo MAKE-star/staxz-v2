@@ -6,7 +6,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
-const COLORS = ['#7B4FA6', '#EC4899', '#F43F5E', '#A855F7', '#14B8A6', '#F59E0B', '#fff'];
+const COLORS = ['#7B4FA6', '#9B6FD4', '#9B6FD4', '#A855F7', '#14B8A6', '#F59E0B', '#fff'];
 const COUNT = 60;
 
 function randomBetween(a: number, b: number) { return a + Math.random() * (b - a); }

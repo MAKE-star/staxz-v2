@@ -12,33 +12,33 @@ const { width, height } = Dimensions.get('window');
 
 const SLIDES = [
   {
-    uri: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=90',
-    headline: 'Your beauty business,',
-    accent: 'on your terms.',
+    uri: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=90',
+    headline: 'Find beauty pros',
+    accent: 'near you.',
   },
   {
     uri: 'https://images.unsplash.com/photo-1512690459411-b9245aed614b?w=800&q=90',
-    headline: 'Reach thousands',
-    accent: 'of clients near you.',
+    headline: 'Book home service',
+    accent: 'or walk-in.',
   },
   {
-    uri: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800&q=90',
-    headline: 'Get paid directly',
-    accent: 'to your bank.',
+    uri: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=90',
+    headline: 'Pay securely,',
+    accent: 'every time.',
   },
   {
     uri: 'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=800&q=90',
-    headline: 'Build your brand,',
-    accent: 'grow your income.',
+    headline: 'Look your best,',
+    accent: 'on your schedule.',
   },
 ];
 
-export default function OnboardingWelcome() {
+export default function HirerWelcome() {
   const router  = useRouter();
   const insets  = useSafeAreaInsets();
   const [idx, setIdx] = useState(0);
-  const opacity   = useSharedValue(1);
-  const btnScale  = useSharedValue(1);
+  const opacity  = useSharedValue(1);
+  const btnScale = useSharedValue(1);
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -69,14 +69,10 @@ export default function OnboardingWelcome() {
 
       {/* Full-bleed image */}
       <Animated.View style={[{ position: 'absolute', top: 0, left: 0, width, height }, imgStyle]}>
-        <Image
-          source={{ uri: slide.uri }}
-          style={{ width, height }}
-          resizeMode="cover"
-        />
+        <Image source={{ uri: slide.uri }} style={{ width, height }} resizeMode="cover" />
       </Animated.View>
 
-      {/* Gradient overlay — bottom two-thirds only */}
+      {/* Gradient overlay */}
       <View style={{ position: 'absolute', top: height * 0.4, left: 0, right: 0, bottom: 0 }}>
         <View style={{ flex: 0.2, backgroundColor: 'rgba(0,0,0,0.15)' }} />
         <View style={{ flex: 0.2, backgroundColor: 'rgba(0,0,0,0.45)' }} />
@@ -100,7 +96,7 @@ export default function OnboardingWelcome() {
           ))}
         </View>
 
-        {/* Headline — animates per slide */}
+        {/* Headline */}
         <Animated.View entering={FadeInUp.duration(400)} key={idx}>
           <Text style={{ fontSize: 36, fontWeight: '900', color: '#fff', lineHeight: 42,
             marginBottom: 10, letterSpacing: -0.5 }}>
@@ -108,20 +104,20 @@ export default function OnboardingWelcome() {
             <Text style={{ color: '#9B6FD4' }}>{slide.accent}</Text>
           </Text>
           <Text style={{ fontSize: 15, color: 'rgba(255,255,255,0.65)', lineHeight: 23, marginBottom: 36 }}>
-            Join thousands of Nigerian beauty professionals earning more on Staxz.
+            Discover top-rated beauty and grooming professionals in Lagos.
           </Text>
         </Animated.View>
 
-        {/* Proceed */}
+        {/* Get Started */}
         <Animated.View style={btnStyle}>
           <TouchableOpacity
-            onPress={() => router.replace('/(provider)/onboarding/step1')}
+            onPress={() => router.replace('/(hirer)/(tabs)')}
             style={{ backgroundColor: '#fff', borderRadius: 16, height: 60,
               alignItems: 'center', justifyContent: 'center',
               shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 16,
               shadowOffset: { width: 0, height: 6 }, elevation: 10 }}>
             <Text style={{ color: '#0D0A14', fontWeight: '900', fontSize: 17, letterSpacing: 0.3 }}>
-              Proceed
+              Explore Providers
             </Text>
           </TouchableOpacity>
         </Animated.View>

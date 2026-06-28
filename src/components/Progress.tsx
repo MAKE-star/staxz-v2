@@ -23,7 +23,7 @@ export function DotBackground() {
       dots.push(
         <View key={`${r}-${c}`} style={{
           width: 3, height: 3, borderRadius: 1.5,
-          backgroundColor: '#EC4899',
+          backgroundColor: '#9B6FD4',
           opacity: 0.07 + (Math.sin(r * 0.8 + c * 0.5) * 0.04),
           margin: 14,
         }} />
@@ -57,7 +57,7 @@ export function Progress({ current, onBack }: { current: number; onBack: () => v
       <TouchableOpacity onPress={onBack}
         style={{ marginBottom: 14, width: 34, height: 34, borderRadius: 17,
           backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
-          shadowColor: '#EC4899', shadowOpacity: 0.12, shadowRadius: 6, elevation: 2,
+          shadowColor: '#9B6FD4', shadowOpacity: 0.12, shadowRadius: 6, elevation: 2,
           borderWidth: 1, borderColor: C.border }}>
         <ChevronLeft size={20} color={C.text0} strokeWidth={2.5} />
       </TouchableOpacity>
@@ -65,21 +65,21 @@ export function Progress({ current, onBack }: { current: number; onBack: () => v
       {/* Step label + % */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
         <Animated.View entering={FadeIn.duration(300)}>
-          <Text style={{ fontSize: 10, fontWeight: '700', color: '#EC4899', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 3 }}>
+          <Text style={{ fontSize: 10, fontWeight: '700', color: '#9B6FD4', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 3 }}>
             Step {current + 1} of {STEPS.length}
           </Text>
           <Text style={{ fontSize: 19, fontWeight: '900', color: C.text0 }}>
             {STEPS[current].label}
           </Text>
         </Animated.View>
-        <Text style={{ fontSize: 24, fontWeight: '900', color: '#EC4899', letterSpacing: -1 }}>
+        <Text style={{ fontSize: 24, fontWeight: '900', color: '#9B6FD4', letterSpacing: -1 }}>
           {pct}%
         </Text>
       </View>
 
       {/* Track */}
       <View style={{ height: 5, backgroundColor: C.bg3, borderRadius: 99, overflow: 'hidden', marginBottom: 10 }}>
-        <Animated.View style={[{ height: 5, backgroundColor: '#EC4899', borderRadius: 99 }, barStyle]} />
+        <Animated.View style={[{ height: 5, backgroundColor: '#9B6FD4', borderRadius: 99 }, barStyle]} />
       </View>
 
       {/* Dots */}
@@ -112,10 +112,10 @@ function StepDot({ index, current, label, onPress }: { index: number; current: n
         width: isActive ? 24 : 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: isCompleted ? '#4CAF82' : isActive ? '#EC4899' : C.bg3,
+        backgroundColor: isCompleted ? '#4CAF82' : isActive ? '#9B6FD4' : C.bg3,
       }, dotStyle]} />
       {isActive && (
-        <Text style={{ fontSize: 8, color: '#EC4899', fontWeight: '700' }}>{label}</Text>
+        <Text style={{ fontSize: 8, color: '#9B6FD4', fontWeight: '700' }}>{label}</Text>
       )}
     </TouchableOpacity>
   );
