@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, Alert, Dimensions } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { View, Text, TouchableOpacity, ScrollView, Image, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useOnboarding } from '../../../src/store/onboarding';
+import { useAuth } from '../../../src/store/auth';
 import { Progress, DotBackground } from '../../../src/components/Progress';
-import { ChevronRight } from 'lucide-react-native';
-import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 import { C, CATS } from '../../../src/constants';
+import { API_URL } from '../../../src/constants';
 import { SERVICE_ICONS } from '../../../src/components/ServiceIcon';
 
 const MIN_PHOTOS = 3;
@@ -15,7 +14,9 @@ const MIN_PHOTOS = 3;
 export default function Step3() {
   const router = useRouter();
   const { data, setPhotos } = useOnboarding();
+  const { token } = useAuth();
   const [photos, setLocalPhotos] = useState<Record<string, string[]>>(data.photos ?? {});
+  const [uploading, setUploading] = useState<string | null>(null);
 
   const selectedCats = CATS.filter(c => data.service_categories.includes(c.id));
 
@@ -25,120 +26,152 @@ export default function Step3() {
       Alert.alert('Permission needed', 'Please allow access to your photo library.');
       return;
     }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 5],
-      quality: 0.85,
+      aspect: [1, 1],
+      quality: 0.8,
     });
+
     if (result.canceled) return;
+
     const uri = result.assets[0].uri;
-    const updated = [...(photos[catId] ?? []), uri];
-    const newPhotos = { ...photos, [catId]: updated };
+    const newCatPhotos = [...(photos[catId] ?? []), uri];
+    const newPhotos = { ...photos, [catId]: newCatPhotos };
     setLocalPhotos(newPhotos);
-    setPhotos(catId, updated);
+    setPhotos(catId, newCatPhotos);
   };
 
   const removePhoto = (catId: string, idx: number) => {
     Alert.alert('Remove photo?', '', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Remove', style: 'destructive', onPress: () => {
-        const updated = (photos[catId] ?? []).filter((_, i) => i !== idx);
-        const newPhotos = { ...photos, [catId]: updated };
-        setLocalPhotos(newPhotos);
-        setPhotos(catId, updated);
-      }},
+      {
+        text: 'Remove', style: 'destructive',
+        onPress: () => {
+          const newCatPhotos = (photos[catId] ?? []).filter((_, i) => i !== idx);
+          const newPhotos = { ...photos, [catId]: newCatPhotos };
+          setLocalPhotos(newPhotos);
+          setPhotos(catId, newCatPhotos);
+        },
+      },
     ]);
   };
 
-  const allReady = selectedCats.length > 0 && selectedCats.every(cat => (photos[cat.id] ?? []).length >= MIN_PHOTOS);
+  const allReady = selectedCats.length > 0
+    && selectedCats.every(cat => (photos[cat.id] ?? []).length >= MIN_PHOTOS);
+
   const totalPhotos = Object.values(photos).reduce((sum, arr) => sum + arr.length, 0);
   const totalNeeded = selectedCats.length * MIN_PHOTOS;
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: C.bg0 }} contentContainerStyle={{ paddingBottom: 48 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: C.bg0 }} contentContainerStyle={{ paddingBottom: 40 }}>
       <DotBackground />
-        <Progress current={2} onBack={() => router.back()} />
+      <Progress current={2} onBack={() => router.back()} />
 
-      <View style={{ paddingHorizontal: 24 }}>
+      <View style={{ paddingHorizontal: 24, paddingTop: 8 }}>
+        <Text style={{ fontSize: 22, fontWeight: '800', color: C.text0, marginBottom: 4 }}>Portfolio Photos</Text>
+        <Text style={{ fontSize: 14, color: C.text2, marginBottom: 16 }}>
+          Upload at least {MIN_PHOTOS} photos per service. Photos are saved when you go live.
+        </Text>
 
-        {/* Progress bar for photos */}
-        <View style={{ backgroundColor: C.bg2, borderRadius: 16, padding: 16, marginBottom: 24 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <Text style={{ fontSize: 14, fontWeight: '800', color: C.text0 }}>
-              {allReady ? '✨ Looking great!' : `${totalPhotos} of ${totalNeeded} photos`}
-            </Text>
-            <Text style={{ fontSize: 12, color: allReady ? C.green : C.text2, fontWeight: '700' }}>
-              {allReady ? 'All done' : `${totalNeeded - totalPhotos} to go`}
-            </Text>
-          </View>
-          <View style={{ height: 8, backgroundColor: C.bg3, borderRadius: 99, overflow: 'hidden' }}>
-            <View style={{ height: 8, width: `${Math.min(100, (totalPhotos / Math.max(totalNeeded, 1)) * 100)}%`, backgroundColor: allReady ? C.green : C.primary, borderRadius: 99 }} />
-          </View>
-          <Text style={{ fontSize: 11, color: C.text2, marginTop: 8 }}>
-            Great photos get 3× more bookings. Show your real work — no filters needed.
+        {/* Progress banner */}
+        <View style={{ backgroundColor: allReady ? C.green + '15' : C.amberLo, borderRadius: 12, padding: 12, marginBottom: 20, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: allReady ? C.green + '40' : C.amber + '40' }}>
+          <Text style={{ fontSize: 20 }}>{allReady ? '✅' : '📸'}</Text>
+          <Text style={{ fontSize: 13, fontWeight: '700', color: allReady ? C.green : C.amber, flex: 1 }}>
+            {allReady
+              ? 'All photos ready! Continue to next step.'
+              : `${totalPhotos} of ${totalNeeded} photos — need ${MIN_PHOTOS} per category`
+            }
           </Text>
         </View>
 
+        {/* Per category */}
         {selectedCats.map(cat => {
           const catPhotos = photos[cat.id] ?? [];
           const ready = catPhotos.length >= MIN_PHOTOS;
+          const iconDef = SERVICE_ICONS[cat.id];
+          const Icon = iconDef?.Icon;
+          const color = iconDef?.color ?? cat.color;
+
           return (
-            <View key={cat.id} style={{ marginBottom: 20, backgroundColor: C.bg1, borderRadius: 20, overflow: 'hidden', borderWidth: 1.5, borderColor: ready ? C.green + '60' : C.border }}>
+            <View key={cat.id} style={{ backgroundColor: C.bg1, borderRadius: 20, marginBottom: 16,
+              borderWidth: 1.5, borderColor: ready ? C.green + '50' : C.border,
+              overflow: 'hidden',
+              shadowColor: ready ? C.green : '#000', shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 }}>
+
               {/* Category header */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: C.border }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+                padding: 16, borderBottomWidth: 1, borderBottomColor: C.border }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  {(() => { const iconDef = SERVICE_ICONS[cat.id]; const Icon = iconDef?.Icon; const color = iconDef?.color ?? cat.color; return (
-                  <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: color + '20', alignItems: 'center', justifyContent: 'center' }}>
+                  <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: color + '20',
+                    alignItems: 'center', justifyContent: 'center' }}>
                     {Icon && <Icon size={20} color={color} strokeWidth={1.75} />}
-                  </View>); })()}
+                  </View>
                   <View>
-                    <Text style={{ fontSize: 15, fontWeight: '800', color: C.text0 }}>{cat.label}</Text>
+                    <Text style={{ fontSize: 15, fontWeight: '700', color: C.text0 }}>{cat.label}</Text>
                     <Text style={{ fontSize: 11, color: C.text2 }}>Minimum {MIN_PHOTOS} photos</Text>
                   </View>
                 </View>
-                <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, backgroundColor: ready ? C.green + '20' : C.amberLo }}>
+                <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99,
+                  backgroundColor: ready ? C.green + '20' : C.amberLo }}>
                   <Text style={{ fontSize: 12, fontWeight: '800', color: ready ? C.green : C.amber }}>
                     {catPhotos.length}/{MIN_PHOTOS}
                   </Text>
                 </View>
               </View>
 
-              {/* Photo carousel */}
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ padding: 14, gap: 8, flexDirection: 'row' }}>
+              {/* Photos — horizontal scroll */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ padding: 14, gap: 10, flexDirection: 'row' }}>
                 {catPhotos.map((uri, i) => (
-                  <TouchableOpacity key={i} onLongPress={() => removePhoto(cat.id, i)} style={{ width: 110, height: 138, borderRadius: 14, overflow: 'hidden', position: 'relative' }}>
+                  <TouchableOpacity key={i} onLongPress={() => removePhoto(cat.id, i)}
+                    style={{ width: 100, height: 125, borderRadius: 14, overflow: 'hidden', position: 'relative' }}>
                     <Image source={{ uri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                    <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.08)' }} />
-                    <View style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={{ color: '#fff', fontSize: 11, fontWeight: '800' }}>✕</Text>
+                    <View style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: 11,
+                      backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ color: '#fff', fontSize: 10, fontWeight: '800' }}>✕</Text>
                     </View>
-                    <View style={{ position: 'absolute', bottom: 6, left: 6, backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
+                    <View style={{ position: 'absolute', bottom: 6, left: 6, backgroundColor: 'rgba(0,0,0,0.4)',
+                      borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
                       <Text style={{ color: '#fff', fontSize: 9, fontWeight: '700' }}>#{i + 1}</Text>
                     </View>
                   </TouchableOpacity>
                 ))}
 
                 {catPhotos.length < 10 && (
-                  <TouchableOpacity onPress={() => addPhoto(cat.id)}
-                    style={{ width: 110, height: 138, borderRadius: 14, borderWidth: 2, borderColor: cat.color + '60', borderStyle: 'dashed', backgroundColor: cat.color + '08', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: cat.color + '20', alignItems: 'center', justifyContent: 'center' }}>
-                      <MCI name='camera-plus-outline' size={26} color={cat.color} />
+                  <TouchableOpacity onPress={() => addPhoto(cat.id)} disabled={uploading === cat.id}
+                    style={{ width: 100, height: 125, borderRadius: 14, borderWidth: 2,
+                      borderColor: color + '60', borderStyle: 'dashed',
+                      backgroundColor: color + '08', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: color + '20',
+                      alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 20 }}>📷</Text>
                     </View>
-                    <Text style={{ fontSize: 11, color: cat.color, fontWeight: '800' }}>Add photo</Text>
-                    <Text style={{ fontSize: 9, color: cat.color + '80' }}>{catPhotos.length}/10</Text>
+                    <Text style={{ fontSize: 11, color: color, fontWeight: '800' }}>Add photo</Text>
+                    <Text style={{ fontSize: 9, color: color + '80' }}>{catPhotos.length}/10</Text>
                   </TouchableOpacity>
                 )}
               </ScrollView>
+
+              {!ready && catPhotos.length > 0 && (
+                <Text style={{ fontSize: 11, color: C.amber, marginHorizontal: 16, marginBottom: 12 }}>
+                  Add {MIN_PHOTOS - catPhotos.length} more photo{MIN_PHOTOS - catPhotos.length !== 1 ? 's' : ''} to continue
+                </Text>
+              )}
             </View>
           );
         })}
 
-        <Text style={{ fontSize: 11, color: C.text2, textAlign: 'center', marginBottom: 20 }}>Long press any photo to remove it</Text>
+        <Text style={{ fontSize: 11, color: C.text2, textAlign: 'center', marginBottom: 20 }}>
+          Long press a photo to remove it
+        </Text>
 
         <TouchableOpacity onPress={() => router.push('/(provider)/onboarding/step4')} disabled={!allReady}
-          style={{ backgroundColor: allReady ? C.primary : C.bg3, borderRadius: 16, height: 56, alignItems: 'center', justifyContent: 'center', elevation: allReady ? 10 : 0, shadowColor: C.primary, shadowOpacity: allReady ? 0.4 : 0, shadowRadius: 14, shadowOffset: { width: 0, height: 6 } }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><Text style={{ color: allReady ? '#fff' : C.text2, fontWeight: '800', fontSize: 16 }}>Continue</Text><ChevronRight size={18} color={allReady ? '#fff' : C.text2} strokeWidth={2.5} /></View>
+          style={{ backgroundColor: allReady ? C.primary : C.border, borderRadius: 14, height: 54,
+            alignItems: 'center', justifyContent: 'center', elevation: allReady ? 8 : 0,
+            shadowColor: C.primary, shadowOpacity: allReady ? 0.4 : 0, shadowRadius: 12, shadowOffset: { width: 0, height: 5 } }}>
+          <Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>Continue</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

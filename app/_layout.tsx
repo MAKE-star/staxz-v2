@@ -1,4 +1,5 @@
 import 'react-native-gesture-handler';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -13,6 +14,7 @@ export default function Layout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={qc}>
+        <StatusBar style='light' backgroundColor='#7B4FA6' translucent={false} />
         <Stack screenOptions={{ headerShown: false }} />
       </QueryClientProvider>
     </GestureHandlerRootView>
