@@ -10,37 +10,54 @@ const MIN_PHOTOS = 3;
 export default function Step3() {
   const router = useRouter();
   
-  // Single source of truth: using data and setPhotos directly from Zustand
+  // Single source of truth: reading directly from Zustand
   const { data, setPhotos } = useOnboarding();
   const photos = data.photos ?? {};
 
   const selectedCats = CATS.filter(c => data.service_categories.includes(c.id));
 
   const addPhoto = async (catId: string) => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please allow access to your photo library.');
-      return;
+    try {
+      // 1. Explicitly request permissions
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please allow access to your photo library.');
+        return;
+      }
+
+      // 2. Launch library with robust configurations
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],    // Modern array syntax for Expo ImagePicker
+        allowsEditing: false,      // Disabled temporarily to circumvent native cropping engine crashes
+        quality: 0.7,              // Slightly reduced to prevent memory issues with large files
+      });
+
+      // 3. Check for cancellation signatures
+      if (result.canceled || (result as any).cancelled) {
+        Alert.alert("Picker Status", "The system reported that the image selection was canceled.");
+        return;
+      }
+
+      // 4. Extract asset URI safely
+      const asset = result.assets?.[0];
+      if (!asset || !asset.uri) {
+        Alert.alert("Data Error", "Image picked successfully, but the system returned an empty file path.");
+        return;
+      }
+
+      const uri = asset.uri;
+      const currentCatPhotos = photos[catId] ?? [];
+      const newCatPhotos = [...currentCatPhotos, uri];
+      
+      // 5. Commit update straight to Zustand store
+      setPhotos(catId, newCatPhotos);
+
+    } catch (error: any) {
+      Alert.alert(
+        "Native Error", 
+        error?.message || "An unexpected error occurred while interacting with your system photo library."
+      );
     }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images', // Modern Expo string syntax
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-
-    // Safely checks for both older and newer Expo cancel signatures
-    if (result.canceled || (result as any).cancelled) return;
-
-    const uri = result.assets?.[0]?.uri;
-    if (!uri) return;
-
-    const currentCatPhotos = photos[catId] ?? [];
-    const newCatPhotos = [...currentCatPhotos, uri];
-    
-    // Update the global store directly
-    setPhotos(catId, newCatPhotos);
   };
 
   const removePhoto = (catId: string, idx: number) => {
