@@ -1,21 +1,18 @@
-import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useOnboarding } from '../../../src/store/onboarding';
-import { useAuth } from '../../../src/store/auth';
 import { Progress } from '../../../src/components/Progress';
 import { C, CATS } from '../../../src/constants';
-import { API_URL } from '../../../src/constants';
 
 const MIN_PHOTOS = 3;
 
 export default function Step3() {
   const router = useRouter();
+  
+  // Single source of truth: using data and setPhotos directly from Zustand
   const { data, setPhotos } = useOnboarding();
-  const { token } = useAuth();
-  const [photos, setLocalPhotos] = useState<Record<string, string[]>>(data.photos ?? {});
-  const [uploading, setUploading] = useState<string | null>(null);
+  const photos = data.photos ?? {};
 
   const selectedCats = CATS.filter(c => data.service_categories.includes(c.id));
 
@@ -27,18 +24,22 @@ export default function Step3() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images', // Modern Expo string syntax
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
     });
 
-    if (result.canceled) return;
+    // Safely checks for both older and newer Expo cancel signatures
+    if (result.canceled || (result as any).cancelled) return;
 
-    const uri = result.assets[0].uri;
-    const newCatPhotos = [...(photos[catId] ?? []), uri];
-    const newPhotos = { ...photos, [catId]: newCatPhotos };
-    setLocalPhotos(newPhotos);
+    const uri = result.assets?.[0]?.uri;
+    if (!uri) return;
+
+    const currentCatPhotos = photos[catId] ?? [];
+    const newCatPhotos = [...currentCatPhotos, uri];
+    
+    // Update the global store directly
     setPhotos(catId, newCatPhotos);
   };
 
@@ -46,11 +47,13 @@ export default function Step3() {
     Alert.alert('Remove photo?', '', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Remove', style: 'destructive',
+        text: 'Remove', 
+        style: 'destructive',
         onPress: () => {
-          const newCatPhotos = (photos[catId] ?? []).filter((_, i) => i !== idx);
-          const newPhotos = { ...photos, [catId]: newCatPhotos };
-          setLocalPhotos(newPhotos);
+          const currentCatPhotos = photos[catId] ?? [];
+          const newCatPhotos = currentCatPhotos.filter((_, i) => i !== idx);
+          
+          // Update the global store directly
           setPhotos(catId, newCatPhotos);
         },
       },
@@ -83,7 +86,7 @@ export default function Step3() {
           </Text>
         </View>
 
-        {/* Per category */}
+        {/* Per category list */}
         {selectedCats.map(cat => {
           const catPhotos = photos[cat.id] ?? [];
           const ready = catPhotos.length >= MIN_PHOTOS;
@@ -113,7 +116,7 @@ export default function Step3() {
                 ))}
 
                 {catPhotos.length < 10 && (
-                  <TouchableOpacity onPress={() => addPhoto(cat.id)} disabled={uploading === cat.id}
+                  <TouchableOpacity onPress={() => addPhoto(cat.id)}
                     style={{ width: 88, height: 88, borderRadius: 12, borderWidth: 2, borderColor: C.border, borderStyle: 'dashed', backgroundColor: C.bg2, alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={{ fontSize: 28, color: C.primary }}>📷</Text>
                     <Text style={{ fontSize: 10, color: C.text2, marginTop: 2 }}>Add</Text>
