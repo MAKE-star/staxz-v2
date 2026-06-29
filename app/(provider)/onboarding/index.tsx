@@ -12,12 +12,12 @@ const { width, height } = Dimensions.get('window');
 
 const SLIDES = [
   {
-    uri: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=90',
+    uri: 'https://images.unsplash.com/flagged/photo-1580820258381-20c91a156841?w=800&q=90',
     headline: 'Your beauty business,',
     accent: 'on your terms.',
   },
   {
-    uri: 'https://images.unsplash.com/photo-1512690459411-b9245aed614b?w=800&q=90',
+    uri: 'https://images.unsplash.com/photo-1594465919760-441fe5908ab0?w=800&q=90',
     headline: 'Reach thousands',
     accent: 'of clients near you.',
   },
@@ -27,18 +27,18 @@ const SLIDES = [
     accent: 'to your bank.',
   },
   {
-    uri: 'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=800&q=90',
+    uri: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=90',
     headline: 'Build your brand,',
     accent: 'grow your income.',
   },
 ];
 
 export default function OnboardingWelcome() {
-  const router  = useRouter();
-  const insets  = useSafeAreaInsets();
+  const router   = useRouter();
+  const insets   = useSafeAreaInsets();
   const [idx, setIdx] = useState(0);
-  const opacity   = useSharedValue(1);
-  const btnScale  = useSharedValue(1);
+  const opacity  = useSharedValue(1);
+  const btnScale = useSharedValue(1);
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -67,22 +67,26 @@ export default function OnboardingWelcome() {
     <View style={{ flex: 1, backgroundColor: '#000' }}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      {/* Full-bleed image */}
+      {/* Full-bleed image — no gaps, no boxes */}
       <Animated.View style={[{ position: 'absolute', top: 0, left: 0, width, height }, imgStyle]}>
-        <Image
-          source={{ uri: slide.uri }}
-          style={{ width, height }}
-          resizeMode="cover"
-        />
+        <Image source={{ uri: slide.uri }} style={{ width, height }} resizeMode="cover" />
       </Animated.View>
 
-      {/* Gradient overlay — bottom two-thirds only */}
-      <View style={{ position: 'absolute', top: height * 0.4, left: 0, right: 0, bottom: 0 }}>
-        <View style={{ flex: 0.2, backgroundColor: 'rgba(0,0,0,0.15)' }} />
-        <View style={{ flex: 0.2, backgroundColor: 'rgba(0,0,0,0.45)' }} />
-        <View style={{ flex: 0.2, backgroundColor: 'rgba(0,0,0,0.68)' }} />
-        <View style={{ flex: 0.2, backgroundColor: 'rgba(0,0,0,0.82)' }} />
-        <View style={{ flex: 0.2, backgroundColor: 'rgba(0,0,0,0.92)' }} />
+      {/* Smooth gradient — pure View opacity layers fading naturally */}
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        pointerEvents="none">
+        {/* Top — completely transparent */}
+        <View style={{ flex: 0.45, backgroundColor: 'transparent' }} />
+        {/* Fade zone — gradual */}
+        <View style={{ flex: 0.08, backgroundColor: 'rgba(0,0,0,0.05)' }} />
+        <View style={{ flex: 0.08, backgroundColor: 'rgba(0,0,0,0.12)' }} />
+        <View style={{ flex: 0.08, backgroundColor: 'rgba(0,0,0,0.22)' }} />
+        <View style={{ flex: 0.08, backgroundColor: 'rgba(0,0,0,0.35)' }} />
+        <View style={{ flex: 0.08, backgroundColor: 'rgba(0,0,0,0.52)' }} />
+        <View style={{ flex: 0.07, backgroundColor: 'rgba(0,0,0,0.68)' }} />
+        <View style={{ flex: 0.06, backgroundColor: 'rgba(0,0,0,0.82)' }} />
+        <View style={{ flex: 0.05, backgroundColor: 'rgba(0,0,0,0.92)' }} />
+        <View style={{ flex: 0.05, backgroundColor: 'rgba(0,0,0,0.97)' }} />
       </View>
 
       {/* Bottom content */}
@@ -90,7 +94,8 @@ export default function OnboardingWelcome() {
         paddingHorizontal: 28, paddingBottom: insets.bottom + 40 }}>
 
         {/* Slide dots — centered */}
-        <View style={{ flexDirection: 'row', gap: 6, marginBottom: 24, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', gap: 6, marginBottom: 24,
+          justifyContent: 'center', alignItems: 'center' }}>
           {SLIDES.map((_, i) => (
             <View key={i} style={{
               height: 4, borderRadius: 2,
@@ -100,7 +105,7 @@ export default function OnboardingWelcome() {
           ))}
         </View>
 
-        {/* Headline — animates per slide */}
+        {/* Headline */}
         <Animated.View entering={FadeInUp.duration(400)} key={idx}>
           <Text style={{ fontSize: 36, fontWeight: '900', color: '#fff', lineHeight: 42,
             marginBottom: 10, letterSpacing: -0.5 }}>

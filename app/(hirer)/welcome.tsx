@@ -12,22 +12,22 @@ const { width, height } = Dimensions.get('window');
 
 const SLIDES = [
   {
-    uri: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=90',
+    uri: 'https://images.unsplash.com/photo-1594465919760-441fe5908ab0?w=800&q=90',
     headline: 'Find beauty pros',
     accent: 'near you.',
   },
   {
-    uri: 'https://images.unsplash.com/photo-1512690459411-b9245aed614b?w=800&q=90',
+    uri: 'https://images.unsplash.com/flagged/photo-1580820258381-20c91a156841?w=800&q=90',
     headline: 'Book home service',
     accent: 'or walk-in.',
   },
   {
-    uri: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=90',
+    uri: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800&q=90',
     headline: 'Pay securely,',
     accent: 'every time.',
   },
   {
-    uri: 'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=800&q=90',
+    uri: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=90',
     headline: 'Look your best,',
     accent: 'on your schedule.',
   },
