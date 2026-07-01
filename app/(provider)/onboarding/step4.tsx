@@ -1,8 +1,10 @@
-import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, FlatList } from 'react-native';
+import { useState, useMemo } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, FlatList, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useOnboarding } from '../../../src/store/onboarding';
-import { Progress } from '../../../src/components/Progress';
+import { Progress, DotBackground } from '../../../src/components/Progress';
+import { ChevronDown, ChevronRight } from 'lucide-react-native';
+import { MaterialCommunityIcons as MCI } from '@expo/vector-icons';
 import { C } from '../../../src/constants';
 import { STATES, getAreasForState } from '../../../src/constants/locations';
 
@@ -12,133 +14,172 @@ export default function Step4() {
   const [stateOpen, setStateOpen] = useState(false);
   const [stateSearch, setStateSearch] = useState('');
 
-  const areas = data.state ? getAreasForState(data.state) : [];
+  // 1. SAFE FALLBACKS: Keeps your app stable even if the data store hasn't populated yet
+  const currentState = data?.state || '';
+  const currentWhatsApp = data?.whatsapp_number || '';
+  const currentArea = data?.location_text || '';
+  const currentAddress = data?.full_address || '';
 
-  const filteredStates = STATES.filter(s =>
-    s.toLowerCase().includes(stateSearch.toLowerCase())
-  );
+  const areas = currentState ? getAreasForState(currentState) : [];
 
-  const canContinue = /^\+234[0-9]{10}$/.test(data.whatsapp_number)
-    && data.state !== ''
-    && data.location_text.trim().length >= 3
-    && data.full_address.trim().length >= 5;
+  // 2. USEMEMO FILTERING: Ensures data array is memoized and doesn't recreate on alternate state changes
+  const filteredStates = useMemo(() => {
+    if (!stateSearch.trim()) return STATES;
+    return STATES.filter(s => s.toLowerCase().includes(stateSearch.toLowerCase()));
+  }, [stateSearch]);
+
+  const whatsappValid = /^\+234[0-9]{10}$/.test(currentWhatsApp);
+  const canContinue = whatsappValid && currentState !== '' && currentArea.trim().length >= 3 && currentAddress.trim().length >= 5;
+
+  // 3. DIAGNOSTIC INTERCEPTOR ALERT
+  const handleOpenStatePicker = () => {
+    try {
+      setStateOpen(true);
+    } catch (error: any) {
+      Alert.alert(
+        "Modal Launch Failure",
+        error?.message || "An error occurred while opening the state modal window view."
+      );
+    }
+  };
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView style={{ flex: 1, backgroundColor: C.bg0 }} contentContainerStyle={{ paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+      <ScrollView style={{ flex: 1, backgroundColor: C.bg0 }} contentContainerStyle={{ paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
+        <DotBackground />
         <Progress current={3} onBack={() => router.back()} />
 
-        <View style={{ paddingHorizontal: 24, paddingTop: 8 }}>
-          <Text style={{ fontSize: 22, fontWeight: '800', color: C.text0, marginBottom: 4 }}>WhatsApp & Location</Text>
-          <Text style={{ fontSize: 14, color: C.text2, marginBottom: 24 }}>
-            Help clients find and contact you
-          </Text>
+        <View style={{ paddingHorizontal: 24 }}>
 
-          {/* WhatsApp info */}
-          <View style={{ backgroundColor: C.green + '15', borderRadius: 14, padding: 14, marginBottom: 20, borderWidth: 1, borderColor: C.green + '30', flexDirection: 'row', gap: 10 }}>
-            <Text style={{ fontSize: 22 }}>💬</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 13, fontWeight: '700', color: C.text0, marginBottom: 3 }}>How enquiries work</Text>
-              <Text style={{ fontSize: 12, color: C.text1, lineHeight: 18 }}>
-                When a client sends an enquiry, our bot messages you on WhatsApp with their details. Reply with your price to accept.
-              </Text>
-            </View>
-          </View>
-
-          {/* WhatsApp number */}
-          <Text style={{ fontSize: 12, fontWeight: '700', color: C.text2, letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase' }}>WhatsApp Number *</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bg1, borderRadius: 12, borderWidth: 1.5, borderColor: /^\+234[0-9]{10}$/.test(data.whatsapp_number) ? C.green : C.border, paddingHorizontal: 14, height: 54, marginBottom: 4 }}>
-            <Text style={{ fontSize: 18, marginRight: 8 }}>🇳🇬</Text>
-            <TextInput value={data.whatsapp_number} onChangeText={v => update({ whatsapp_number: v })}
-              keyboardType="phone-pad" placeholder="+2348012345678" maxLength={14}
-              style={{ flex: 1, fontSize: 15, color: C.text0 }} placeholderTextColor={C.text2} />
-            {/^\+234[0-9]{10}$/.test(data.whatsapp_number) && <Text style={{ color: C.green }}>✓</Text>}
-          </View>
-          <Text style={{ fontSize: 12, color: C.text2, marginBottom: 24 }}>Must have WhatsApp active on this number</Text>
-
-          {/* STATE */}
-          <Text style={{ fontSize: 12, fontWeight: '700', color: C.text2, letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase' }}>State *</Text>
-          <TouchableOpacity onPress={() => setStateOpen(true)}
-            style={{ backgroundColor: C.bg1, borderRadius: 12, borderWidth: 1.5, borderColor: data.state ? C.primary : C.border, padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <Text style={{ fontSize: 15, color: data.state ? C.text0 : C.text2 }}>
-              {data.state || 'Select your state'}
-            </Text>
-            <Text style={{ color: C.text2 }}>▼</Text>
-          </TouchableOpacity>
-
-          {/* AREA / NEIGHBOURHOOD */}
-          {data.state !== '' && (
-            <>
-              <Text style={{ fontSize: 12, fontWeight: '700', color: C.text2, letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase' }}>Area / Neighbourhood *</Text>
-              <TextInput value={data.location_text} onChangeText={v => update({ location_text: v })}
-                placeholder="e.g. Lekki Phase 1"
-                style={{ backgroundColor: C.bg1, borderRadius: 12, borderWidth: 1.5, borderColor: C.border, padding: 14, fontSize: 15, color: C.text0, marginBottom: 10 }} />
-
-              <Text style={{ fontSize: 12, fontWeight: '600', color: C.text2, marginBottom: 8 }}>Quick pick:</Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-                {areas.map(area => (
-                  <TouchableOpacity key={area} onPress={() => update({ location_text: area })}
-                    style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99, borderWidth: 1.5, borderColor: data.location_text === area ? C.primary : C.border, backgroundColor: data.location_text === area ? C.primary : C.bg1 }}>
-                    <Text style={{ fontSize: 12, fontWeight: '600', color: data.location_text === area ? C.white : C.text1 }}>
-                      {area}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+          {/* WhatsApp section */}
+          <View style={{ backgroundColor: '#25D366' + '12', borderRadius: 20, padding: 18, marginBottom: 28, borderWidth: 1.5, borderColor: '#25D366' + '30' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: '#25D366' + '20', alignItems: 'center', justifyContent: 'center' }}>
+                <MCI name='whatsapp' size={24} color='#25D366' />
               </View>
-            </>
-          )}
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: C.text0 }}>WhatsApp Number</Text>
+                <Text style={{ fontSize: 12, color: C.text2, marginTop: 2 }}>How clients send you enquiries</Text>
+              </View>
+            </View>
 
-          {/* FULL ADDRESS */}
-          <Text style={{ fontSize: 12, fontWeight: '700', color: C.text2, letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase' }}>Full Address *</Text>
-          <TextInput
-            value={data.full_address}
-            onChangeText={v => update({ full_address: v })}
-            placeholder="e.g. 12 Admiralty Way, Lekki Phase 1, Lagos"
-            multiline numberOfLines={2}
-            style={{ backgroundColor: C.bg1, borderRadius: 12, borderWidth: 1.5, borderColor: C.border, padding: 14, fontSize: 15, color: C.text0, marginBottom: 4, minHeight: 70, textAlignVertical: 'top' }}
-          />
-          <Text style={{ fontSize: 12, color: C.text2, marginBottom: 32 }}>
-            Exact address shown to clients only after confirmed booking
-          </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: whatsappValid ? '#25D366' : C.border, paddingHorizontal: 14, height: 54 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginRight: 10, paddingRight: 10, borderRightWidth: 1, borderRightColor: C.border }}>
+                <Text style={{ fontSize: 18 }}>🇳🇬</Text>
+                <Text style={{ fontSize: 13, color: C.text2, fontWeight: '600' }}>+234</Text>
+              </View>
+              <TextInput value={currentWhatsApp} onChangeText={v => update({ whatsapp_number: v })}
+                keyboardType="phone-pad" placeholder="08012345678" maxLength={14}
+                style={{ flex: 1, fontSize: 15, color: C.text0, fontWeight: '600' }} placeholderTextColor={C.text2} />
+              {whatsappValid && <Text style={{ color: '#25D366', fontSize: 18 }}>✓</Text>}
+            </View>
 
+            <Text style={{ fontSize: 12, color: C.text2, marginTop: 10, lineHeight: 18 }}>
+              When a client sends an enquiry, our bot messages you here with their details. Reply with your quote to accept.
+            </Text>
+          </View>
+
+          {/* Location section */}
+          <View style={{ backgroundColor: C.bg1, borderRadius: 20, padding: 18, marginBottom: 24, borderWidth: 1, borderColor: C.border }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: C.primaryLo, alignItems: 'center', justifyContent: 'center' }}>
+                <MCI name='map-marker-outline' size={24} color={C.primary} />
+              </View>
+              <View>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: C.text0 }}>Your Location</Text>
+                <Text style={{ fontSize: 12, color: C.text2, marginTop: 2 }}>Helps clients find providers near them</Text>
+              </View>
+            </View>
+
+            {/* State Selection */}
+            <Text style={{ fontSize: 11, fontWeight: '800', color: C.text2, letterSpacing: 0.8, marginBottom: 8, textTransform: 'uppercase' }}>State *</Text>
+            <TouchableOpacity onPress={handleOpenStatePicker}
+              style={{ backgroundColor: C.bg2, borderRadius: 12, borderWidth: 1.5, borderColor: currentState ? C.primary : C.border, padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={{ fontSize: 15, color: currentState ? C.text0 : C.text2, fontWeight: currentState ? '600' : '400' }}>
+                {currentState || 'Select your state'}
+              </Text>
+              <ChevronDown size={16} color={C.text2} />
+            </TouchableOpacity>
+
+            {/* Area */}
+            {currentState !== '' && (
+              <>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: C.text2, letterSpacing: 0.8, marginBottom: 8, textTransform: 'uppercase' }}>Area / Neighbourhood *</Text>
+                <TextInput value={currentArea} onChangeText={v => update({ location_text: v })}
+                  placeholder="e.g. Lekki Phase 1" placeholderTextColor={C.text2}
+                  style={{ backgroundColor: C.bg2, borderRadius: 12, borderWidth: 1.5, borderColor: currentArea.length >= 3 ? C.primary : C.border, paddingHorizontal: 14, height: 50, fontSize: 15, color: C.text0, marginBottom: 12 }} />
+
+                {areas.length > 0 && (
+                  <>
+                    <Text style={{ fontSize: 11, fontWeight: '700', color: C.text2, marginBottom: 8 }}>Quick pick:</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
+                      {areas.map(area => (
+                        <TouchableOpacity key={area} onPress={() => update({ location_text: area })}
+                          style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: 99, borderWidth: 1.5, borderColor: currentArea === area ? C.primary : C.border, backgroundColor: currentArea === area ? C.primary : C.bg2 }}>
+                          <Text style={{ fontSize: 12, fontWeight: '700', color: currentArea === area ? '#fff' : C.text1 }}>{area}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </>
+                )}
+
+                <Text style={{ fontSize: 11, fontWeight: '800', color: C.text2, letterSpacing: 0.8, marginBottom: 8, textTransform: 'uppercase' }}>Full Address *</Text>
+                <TextInput value={currentAddress} onChangeText={v => update({ full_address: v })}
+                  placeholder="e.g. 12 Admiralty Way, Lekki Phase 1, Lagos"
+                  multiline numberOfLines={2} placeholderTextColor={C.text2}
+                  style={{ backgroundColor: C.bg2, borderRadius: 12, borderWidth: 1.5, borderColor: currentAddress.length >= 5 ? C.primary : C.border, padding: 14, fontSize: 14, color: C.text0, minHeight: 70, textAlignVertical: 'top' }} />
+                <Text style={{ fontSize: 11, color: C.text2, marginTop: 6 }}>
+                  Only revealed to clients after a confirmed booking
+                </Text>
+              </>
+            )}
+          </View>
+
+          {/* Continue Action */}
           <TouchableOpacity onPress={() => router.push('/(provider)/onboarding/step5')} disabled={!canContinue}
-            style={{ backgroundColor: canContinue ? C.primary : C.border, borderRadius: 14, height: 54, alignItems: 'center', justifyContent: 'center', elevation: canContinue ? 8 : 0 }}>
-            <Text style={{ color: C.white, fontWeight: '700', fontSize: 16 }}>Continue</Text>
+            style={{ backgroundColor: canContinue ? C.primary : C.bg3, borderRadius: 16, height: 56, alignItems: 'center', justifyContent: 'center', elevation: canContinue ? 10 : 0, shadowColor: C.primary, shadowOpacity: canContinue ? 0.4 : 0, shadowRadius: 14, shadowOffset: { width: 0, height: 6 } }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><Text style={{ color: canContinue ? '#fff' : C.text2, fontWeight: '800', fontSize: 16 }}>Continue</Text><ChevronRight size={18} color={canContinue ? '#fff' : C.text2} strokeWidth={2.5} /></View>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
       {/* State picker modal */}
       <Modal visible={stateOpen} transparent animationType="slide" onRequestClose={() => setStateOpen(false)}>
-        <TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }} onPress={() => setStateOpen(false)} />
-        <View style={{ backgroundColor: C.bg1, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, maxHeight: '75%' }}>
-          <View style={{ width: 36, height: 4, backgroundColor: C.border, borderRadius: 2, alignSelf: 'center', marginBottom: 16 }} />
-          <Text style={{ fontSize: 18, fontWeight: '700', color: C.text0, marginBottom: 12 }}>Select State</Text>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bg2, borderRadius: 12, paddingHorizontal: 14, height: 44, marginBottom: 12, borderWidth: 1, borderColor: C.border }}>
-            <Text style={{ marginRight: 8 }}>🔍</Text>
+        <TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' }} onPress={() => setStateOpen(false)} />
+        <View style={{ backgroundColor: C.bg1, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, maxHeight: '75%' }}>
+          <View style={{ width: 40, height: 5, backgroundColor: C.border, borderRadius: 3, alignSelf: 'center', marginBottom: 18 }} />
+          <Text style={{ fontSize: 20, fontWeight: '800', color: C.text0, marginBottom: 14 }}>Select State</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.bg2, borderRadius: 14, paddingHorizontal: 14, height: 48, marginBottom: 14, borderWidth: 1, borderColor: C.border }}>
+            <Text style={{ marginRight: 8, fontSize: 16 }}>🔍</Text>
             <TextInput value={stateSearch} onChangeText={setStateSearch}
               placeholder="Search state..." placeholderTextColor={C.text2}
-              style={{ flex: 1, fontSize: 14, color: C.text0 }} />
+              style={{ flex: 1, fontSize: 15, color: C.text0 }} />
           </View>
-
-          <FlatList
-            data={filteredStates}
+          
+          <FlatList 
+            data={filteredStates} 
             keyExtractor={s => s}
+            initialNumToRender={12}       // 4. PERFORMANCE PROPS: Prevents thread lock on window load
+            maxToRenderPerBatch={12}       
+            windowSize={5}                 
+            removeClippedSubviews={true}  
             renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => {
-                  update({ state: item, location_text: '', full_address: '' });
-                  setStateSearch('');
-                  setStateOpen(false);
+              <TouchableOpacity 
+                onPress={() => { 
+                  try {
+                    update({ state: item, location_text: '', full_address: '' }); 
+                    setStateSearch(''); 
+                    setStateOpen(false); 
+                  } catch (err: any) {
+                    Alert.alert("State Store Update Failure", err?.message || "Failed to save data context value modification.");
+                  }
                 }}
-                style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderBottomWidth: 0.5, borderBottomColor: C.border, backgroundColor: item === data.state ? C.bg2 : 'transparent' }}>
-                <Text style={{ fontSize: 15, color: item === data.state ? C.primary : C.text0, fontWeight: item === data.state ? '700' : '400' }}>
-                  {item}
-                </Text>
-                {item === data.state && <Text style={{ color: C.primary, fontWeight: '700' }}>✓</Text>}
+                style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 0.5, borderBottomColor: C.border, backgroundColor: item === currentState ? C.bg2 : 'transparent', borderRadius: item === currentState ? 10 : 0 }}
+              >
+                <Text style={{ fontSize: 15, color: item === currentState ? C.primary : C.text0, fontWeight: item === currentState ? '800' : '400' }}>{item}</Text>
+                {item === currentState && <Text style={{ color: C.primary, fontWeight: '800' }}>✓</Text>}
               </TouchableOpacity>
-            )}
+            )} 
           />
         </View>
       </Modal>
